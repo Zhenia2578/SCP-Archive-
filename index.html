@@ -1,10 +1,9 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<script>(function(){function fmt(a){if(a instanceof Error)return a.message;if(typeof a==="object"&&a!==null){try{return JSON.stringify(a)}catch(e){return String(a)}}return String(a)}function send(t,m,l){try{parent.postMessage({__stc:1,type:t,msg:m,line:l},"*")}catch(e){}}["log","info","warn","error"].forEach(function(m){var o=console[m];console[m]=function(){send(m,Array.prototype.map.call(arguments,fmt).join(" "));if(o)o.apply(console,arguments)}});window.addEventListener("error",function(e){send("error",e.message,e.lineno)});window.addEventListener("unhandledrejection",function(e){send("error","Promise: "+fmt(e.reason))});})();</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SCP-173: Симулятор Исследования</title>
+<title>SCP-173 // Исследовательский терминал</title>
 <!-- Telegram Web App SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -47,7 +46,7 @@ header {
 
 /* Cam Viewport */
 .viewport {
-  position: relative; height: 220px; background: #050709;
+  position: relative; height: 210px; background: #050709;
   overflow: hidden; display: flex; justify-content: center; align-items: center;
 }
 .viewport.lights-off { background: #000 !important; }
@@ -60,7 +59,7 @@ header {
   border: 2px solid #1c2633; margin: 8px; border-radius: 4px;
 }
 .dirty-overlay {
-  position: absolute; inset: 0; background: radial-gradient(circle at 50% 70%, rgba(100, 30, 10, 0.4), transparent 70%);
+  position: absolute; inset: 0; background: radial-gradient(circle at 50% 70%, rgba(100, 30, 10, 0.5), transparent 70%);
   pointer-events: none; opacity: 0; transition: opacity 0.5s;
 }
 
@@ -68,10 +67,10 @@ header {
   position: absolute; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex; flex-direction: column; align-items: center;
 }
-.scp-container.pos-center { bottom: 50px; scale: 0.8; }
-.scp-container.pos-corner { bottom: 70px; left: 25%; scale: 0.65; }
-.scp-container.pos-close { bottom: 20px; scale: 1.1; }
-.scp-container.pos-door { bottom: -10px; scale: 1.6; filter: drop-shadow(0 0 10px rgba(230,74,25,0.8)); }
+.scp-container.pos-center { bottom: 45px; scale: 0.8; }
+.scp-container.pos-corner { bottom: 65px; left: 22%; scale: 0.65; }
+.scp-container.pos-close { bottom: 15px; scale: 1.1; }
+.scp-container.pos-door { bottom: -15px; scale: 1.6; filter: drop-shadow(0 0 12px rgba(230,74,25,0.9)); }
 
 .scp-statue {
   width: 45px; height: 80px; background: #8a8e94; border-radius: 16px 16px 8px 8px;
@@ -99,18 +98,18 @@ header {
 
 .tabs { display: flex; border-bottom: 1px solid var(--panel-border); background: rgba(0,0,0,0.15); }
 .tab-btn {
-  flex: 1; padding: 8px 4px; background: none; border: none; color: var(--muted);
+  flex: 1; padding: 10px 4px; background: none; border: none; color: var(--muted);
   font-weight: 600; font-size: 10px; text-transform: uppercase; cursor: pointer;
   border-bottom: 2px solid transparent; transition: 0.2s;
 }
 .tab-btn.active { color: #fff; border-bottom-color: var(--accent); background: rgba(255,255,255,0.02); }
 
-.tab-content { padding: 10px; display: none; flex-direction: column; gap: 8px; height: 260px; overflow-y: auto; }
+.tab-content { padding: 10px; display: none; flex-direction: column; gap: 8px; height: 280px; overflow-y: auto; }
 .tab-content.active { display: flex; }
 
 .act-card {
   background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border);
-  padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
 }
 .act-info h4 { margin: 0 0 2px 0; font-size: 12px; color: #fff; }
 .act-info p { margin: 0; font-size: 10px; color: var(--muted); }
@@ -118,7 +117,8 @@ header {
   background: var(--accent); color: #fff; border: none; padding: 6px 10px;
   border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; white-space: nowrap;
 }
-.btn:active { opacity: 0.8; }
+.btn:disabled { background: #26303d; color: #556270; cursor: not-allowed; }
+.btn:active:not(:disabled) { opacity: 0.8; }
 .btn-danger { background: var(--red); }
 
 .hyp-item {
@@ -133,12 +133,161 @@ header {
 .log-entry { font-family: monospace; font-size: 10px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #b0bec5; }
 .log-time { color: var(--blue); margin-right: 4px; }
 
+/* Dossier Styling */
+.dossier-block {
+  background: rgba(0,0,0,0.3); border: 1px solid var(--panel-border);
+  border-left: 3px solid #555; padding: 8px 10px; border-radius: 4px; font-size: 11px; line-height: 1.5;
+}
+.dossier-block.unlocked { border-left-color: var(--green); background: rgba(76,175,80,0.05); }
+.redacted {
+  background: #202832; color: var(--muted); padding: 1px 4px; border-radius: 2px;
+  font-family: monospace; font-size: 10px; letter-spacing: 0.5px;
+}
+.revealed-text { color: #a5d6a7; font-weight: 500; }
+
 .game-over {
   position: absolute; inset: 0; background: rgba(18, 2, 2, 0.95);
   display: none; flex-direction: column; justify-content: center; align-items: center;
   z-index: 100; text-align: center; padding: 15px;
 }
-.game-over h2 { color: var(--red); font-size: 20px; margin: 0 0 8px; text-shadow: 0 0 8px var(--red); }
+.game-over h2 { color: var(--red); font-size: 18px; margin: 0 0 8px; text-shadow: 0 0 8px var(--red); }
+</style>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  font-family: Inter, system-ui, sans-serif;
+  color: #1a1a1a;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #ffe9c7 0%, transparent 60%),
+    radial-gradient(900px 500px at -10% 100%, #d6ecff 0%, transparent 55%),
+    #faf7f0;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  padding: 28px;
+  border: 1px solid rgba(20, 20, 20, 0.06);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px -20px rgba(20, 20, 20, 0.18), 0 2px 0 rgba(20, 20, 20, 0.04);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0a7d6b;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: #0a7d6b;
+  box-shadow: 0 0 0 4px rgba(10, 125, 107, 0.18);
+}
+
+.num {
+  color: #8a8275;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+}
+
+h1 {
+  margin: 0 0 6px;
+  color: #8a8275;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.idea {
+  min-height: 108px;
+  margin: 0 0 24px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  flex: 1;
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 18px;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+
+button:hover {
+  background: #000000;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button.secondary {
+  flex: 0 0 auto;
+  width: 48px;
+  border: 1px solid #e4dfd1;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 18px;
+}
+
+button.secondary:hover {
+  border-color: #1a1a1a;
+  background: #faf7f0;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed #e4dfd1;
+  color: #8a8275;
+  font-size: 12px;
+}
+
+.meta b {
+  color: #1a1a1a;
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -147,7 +296,7 @@ header {
   <header>
     <div class="brand">
       <h1>SCP-173 // ТЕРМИНАЛ</h1>
-      <p>Сектор 19</p>
+      <p>Сектор 19 · Лаборатория аномалий</p>
     </div>
     <div class="status-badge" id="threatBadge">НИЗКАЯ УГРОЗА</div>
   </header>
@@ -197,61 +346,89 @@ header {
         <button class="tab-btn" onclick="switchTab('logs')">Журнал</button>
       </div>
 
+      <!-- TAB 1: EXPERIMENTS -->
       <div class="tab-content active" id="tab-experiments">
         <div class="act-card">
-          <div class="act-info"><h4>Моргание D-класса</h4><p>Поочередный контроль век.</p></div>
+          <div class="act-info"><h4>1. Поочередное моргание</h4><p>Приказать D-классу моргать по очереди.</p></div>
           <button class="btn" onclick="runExperiment('blinkTest')">-10% АКБ</button>
         </div>
         <div class="act-card">
-          <div class="act-info"><h4>Отключение света</h4><p>Тест в темноте (5 сек).</p></div>
+          <div class="act-info"><h4>2. Отключение света (5 сек)</h4><p>Проверка реакции в темноте.</p></div>
           <button class="btn" onclick="runExperiment('lightTest')">Выкл свет</button>
         </div>
         <div class="act-card">
-          <div class="act-info"><h4>Очистка пола</h4><p>Отправить D-класс.</p></div>
-          <button class="btn" onclick="runExperiment('cleanTest')">Уборка</button>
+          <div class="act-info"><h4>3. Спектрометрия покрытия</h4><p>Анализ краски и состава поверхности.</p></div>
+          <button class="btn" onclick="runExperiment('spectroTest')">-15% АКБ</button>
         </div>
         <div class="act-card">
-          <div class="act-info"><h4>Аудиомониторинг</h4><p>Запись шумов.</p></div>
+          <div class="act-info"><h4>4. Уборка биоматериалов</h4><p>Отправить D-класс в камеру.</p></div>
+          <button class="btn" onclick="runExperiment('cleanTest')">Отправить D</button>
+        </div>
+        <div class="act-card">
+          <div class="act-info"><h4>5. Акустический анализ</h4><p>Запись звуков в отсутствие людей.</p></div>
           <button class="btn" onclick="runExperiment('audioTest')">-15% АКБ</button>
         </div>
         <div class="act-card">
-          <div class="act-info"><h4>Подзарядка</h4><p>Восстановить энергию.</p></div>
-          <button class="btn" style="background:#2e7d32" onclick="rechargeEnergy()">Заряд</button>
+          <div class="act-info"><h4>Зарядка аккумуляторов</h4><p>Восстановить энергию системы.</p></div>
+          <button class="btn" style="background:#2e7d32" onclick="rechargeEnergy()">Зарядить</button>
         </div>
       </div>
 
+      <!-- TAB 2: HYPOTHESES -->
       <div class="tab-content" id="tab-hypotheses">
         <div class="hyp-item">
-          <div class="hyp-header"><span>1. Движение без взгляда</span><span class="status-tag tag-pending" id="tag-hyp-1">Не проверено</span></div>
-          <p style="font-size:10px; color:var(--muted); margin:2px 0 6px;">Объект двигается только когда на него не смотрят.</p>
-          <button class="btn" id="btn-hyp-1" onclick="verifyHypothesis(1)">Проверить</button>
+          <div class="hyp-header"><span>1. Квантовая блокировка движения</span><span class="status-tag tag-pending" id="tag-hyp-1">Не проверено</span></div>
+          <p style="font-size:10px; color:var(--muted); margin:2px 0 6px;">Объект не может перемещаться, если за ним ведется прямой визуальный контроль.</p>
+          <button class="btn" id="btn-hyp-1" onclick="verifyHypothesis(1)">Проверить гипотезу</button>
         </div>
         <div class="hyp-item">
-          <div class="hyp-header"><span>2. Природа загрязнений</span><span class="status-tag tag-pending" id="tag-hyp-2">Не проверено</span></div>
-          <p style="font-size:10px; color:var(--muted); margin:2px 0 6px;">Кровь и фекалии выделяются объектом.</p>
-          <button class="btn" id="btn-hyp-2" onclick="verifyHypothesis(2)">Проверить</button>
+          <div class="hyp-header"><span>2. Происхождение материалов</span><span class="status-tag tag-pending" id="tag-hyp-2">Не проверено</span></div>
+          <p style="font-size:10px; color:var(--muted); margin:2px 0 6px;">Объект изготовлен из бетона, арматуры и следов промышленной краски.</p>
+          <button class="btn" id="btn-hyp-2" onclick="verifyHypothesis(2)">Проверить гипотезу</button>
         </div>
         <div class="hyp-item">
-          <div class="hyp-header"><span>3. Летальная угроза</span><span class="status-tag tag-pending" id="tag-hyp-3">Не проверено</span></div>
-          <p style="font-size:10px; color:var(--muted); margin:2px 0 6px;">Атакует персонал при сближении.</p>
-          <button class="btn" id="btn-hyp-3" onclick="verifyHypothesis(3)">Проверить</button>
+          <div class="hyp-header"><span>3. Выделение биомасс</span><span class="status-tag tag-pending" id="tag-hyp-3">Не проверено</span></div>
+          <p style="font-size:10px; color:var(--muted); margin:2px 0 6px;">Кровь и фекальные массы на полу выделяются самим объектом непрерывно.</p>
+          <button class="btn" id="btn-hyp-3" onclick="verifyHypothesis(3)">Проверить гипотезу</button>
+        </div>
+        <div class="hyp-item">
+          <div class="hyp-header"><span>4. Метод ликвидации жертв</span><span class="status-tag tag-pending" id="tag-hyp-4">Не проверено</span></div>
+          <p style="font-size:10px; color:var(--muted); margin:2px 0 6px;">Объект убивает людей путем перелома шеи у основания черепа.</p>
+          <button class="btn" id="btn-hyp-4" onclick="verifyHypothesis(4)">Проверить гипотезу</button>
         </div>
       </div>
 
+      <!-- TAB 3: DOSSIER -->
       <div class="tab-content" id="tab-dossier">
-        <div id="dossierContent" style="font-size:11px; line-height:1.5; color:#cfd8dc;">
-          <p><i>Досье заполняется по мере подтверждения гипотез...</i></p>
+        <div class="dossier-block" id="dos-class">
+          <b>Объект №:</b> SCP-173<br>
+          <b>Класс объекта:</b> <span id="text-class" class="redacted">[ЗАБЛОКИРОВАНО — ПОДТВЕРДИТЕ ГИПОТЕЗУ 1 И 4]</span>
         </div>
-        <button class="btn" id="btnFinalize" disabled onclick="finalizeDossier()" style="margin-top:auto;">Сформировать отчёт</button>
+
+        <div class="dossier-block" id="dos-containment">
+          <b>Особые условия содержания:</b><br>
+          Объект SCP-173 должен содержаться в запертом контейнере. При входе персонала в камеру должно быть не менее <span id="text-containment-1" class="redacted">[ТРЕБУЕТСЯ ЭКСПЕРИМЕНТ №4]</span> человек, а дверь за ними должна запечатываться. <span id="text-containment-2" class="redacted">[ПОДТВЕРДИТЕ ГИПОТЕЗУ 1]</span>
+        </div>
+
+        <div class="dossier-block" id="dos-desc">
+          <b>Описание:</b><br>
+          Приведен в Зону 19 в 1993 г. Происхождение неизвестно. Изготовлен из <span id="text-desc-1" class="redacted">[ТРЕБУЕТСЯ ЭКСПЕРИМЕНТ №3]</span>. SCP-173 одушевлен и крайне враждебен. Объект не может перемещаться в <span id="text-desc-2" class="redacted">[ПОДТВЕРДИТЕ ГИПОТЕЗУ 1]</span>.
+        </div>
+
+        <div class="dossier-block" id="dos-threat">
+          <b>Поведение и угроза:</b><br>
+          Объект атакует путем <span id="text-threat-1" class="redacted">[ПОДТВЕРДИТЕ ГИПОТЕЗУ 4]</span>. Состав на полу камеры состоит из <span id="text-threat-2" class="redacted">[ПОДТВЕРДИТЕ ГИПОТЕЗУ 3]</span>. Происхождение этих материалов неизвестно. Камера должна очищаться раз в две недели.
+        </div>
       </div>
 
+      <!-- TAB 4: LOGS -->
       <div class="tab-content" id="tab-logs"></div>
     </div>
   </div>
 </div>
 
 <script>
-// Инициализация Telegram Web App
+// Telegram Web App SDK
 let tg = window.Telegram.WebApp;
 if (tg) {
   tg.expand();
@@ -266,7 +443,7 @@ function haptic(style = 'medium') {
 
 const state = {
   energy: 100, cleanliness: 100, dClassCount: 3, position: 0,
-  hypotheses: { 1: null, 2: null, 3: null },
+  hypotheses: { 1: false, 2: false, 3: false, 4: false },
   testedExperiments: new Set(), logs: []
 };
 
@@ -298,8 +475,10 @@ function updateUI() {
   else if(state.position >= 2) { badge.textContent = 'ВЫСОКАЯ УГРОЗА'; badge.style.color = 'var(--red)'; }
 
   if(state.position >= 3) {
-    triggerGameOver('SCP-173 ликвидировал персонал в камере.');
+    triggerGameOver('SCP-173 мгновенно ликвидировал весь персонал в камере.');
   }
+
+  updateDossier();
 }
 
 function switchTab(tabId) {
@@ -313,46 +492,52 @@ function switchTab(tabId) {
 function runExperiment(type) {
   haptic('medium');
   if(state.energy < 10 && type !== 'recharge') {
-    addLog('Ошибка: Недостаточно энергии!');
+    addLog('Ошибка: Недостаточно энергии аккумуляторов!');
     return;
   }
   state.testedExperiments.add(type);
 
   if(type === 'blinkTest') {
     state.energy -= 10;
-    addLog('Моргание: Скульптура совершила сдвиг.');
-    if(Math.random() > 0.5 && state.position < 2) state.position++;
+    addLog('Тест 1 (Моргание): Скульптура сдвинулась в момент синхронного моргания!');
+    if(Math.random() > 0.4 && state.position < 2) state.position++;
   } 
   else if(type === 'lightTest') {
     state.energy -= 15;
     const vp = document.getElementById('viewport');
     document.getElementById('lightStatusText').textContent = 'СВЕТ: ВЫКЛ';
+    document.getElementById('lightStatusText').style.color = 'var(--red)';
     vp.classList.add('lights-off');
-    addLog('Свет отключен...');
+    addLog('Тест 2: Свет отключен на 5 секунд...');
     setTimeout(() => {
       vp.classList.remove('lights-off');
       document.getElementById('lightStatusText').textContent = 'СВЕТ: ВКЛ';
+      document.getElementById('lightStatusText').style.color = 'var(--green)';
       state.position = Math.min(3, state.position + 2);
-      addLog('Внимание: SCP-173 резко сократил дистанцию!');
+      addLog('Внимание: После включения света SCP-173 оказался прямо перед объективом!');
       updateUI();
     }, 2000);
   }
+  else if(type === 'spectroTest') {
+    state.energy -= 15;
+    addLog('Тест 3 (Спектрометрия): Состав поверхности — бетон, арматура и аэрозольная краска Krylon.');
+  }
   else if(type === 'cleanTest') {
-    if(state.dClassCount <= 0) { addLog('Нет доступного D-класса!'); return; }
+    if(state.dClassCount <= 0) { addLog('Ошибка: Нет доступного персонала D-класса!'); return; }
     state.energy -= 10;
     if(state.position >= 2) {
       state.dClassCount--;
-      addLog('Трагедия: Сотрудник D-класса погиб при очистке!');
+      addLog('Трагедия: Из-за нехватки дистанции один сотрудник D-класса погиб (перелом шеи)!');
     } else {
       state.cleanliness = 100;
       state.position = 0;
-      addLog('Камера успешно очищена.');
+      addLog('Тест 4 (Уборка): Камера очищена. Минимальная группа входа — 3 человека.');
     }
   }
   else if(type === 'audioTest') {
     state.energy -= 15;
-    state.cleanliness = Math.max(0, state.cleanliness - 20);
-    addLog('Аудио: Зафиксирован скрежет бетона.');
+    state.cleanliness = Math.max(0, state.cleanliness - 25);
+    addLog('Тест 5 (Аудио): Зафиксирован скрежет. На полу быстро увеличивается слой красноватой массы.');
   }
   updateUI();
 }
@@ -370,27 +555,68 @@ function verifyHypothesis(id) {
   const btn = document.getElementById('btn-hyp-' + id);
 
   if(id === 1 && (state.testedExperiments.has('lightTest') || state.testedExperiments.has('blinkTest'))) {
-    state.hypotheses[1] = true; tag.textContent = 'Подтверждено'; tag.className = 'status-tag tag-proven'; btn.disabled = true;
-    addLog('Гипотеза 1 доказана: связь с визуальным контактом.');
-  } else if(id === 2 && (state.testedExperiments.has('audioTest') || state.testedExperiments.has('cleanTest'))) {
-    state.hypotheses[2] = true; tag.textContent = 'Подтверждено'; tag.className = 'status-tag tag-proven'; btn.disabled = true;
-    addLog('Гипотеза 2 доказана: биоматериалы объекта.');
-  } else if(id === 3 && state.testedExperiments.has('cleanTest') && state.hypotheses[1]) {
-    state.hypotheses[3] = true; tag.textContent: 'Подтверждено'; tag.className = 'status-tag tag-proven'; btn.disabled = true;
-    addLog('Гипотеза 3 доказана: летальная опасность при сближении.');
-  } else {
-    addLog('Недостаточно данных для подтверждения гипотезы.');
+    state.hypotheses[1] = true;
+    tag.textContent = 'Подтверждено'; tag.className = 'status-tag tag-proven'; btn.disabled = true;
+    addLog('Гипотеза 1 доказана: прямая связь движения с визуальным контактом.');
+  } 
+  else if(id === 2 && state.testedExperiments.has('spectroTest')) {
+    state.hypotheses[2] = true;
+    tag.textContent = 'Подтверждено'; tag.className = 'status-tag tag-proven'; btn.disabled = true;
+    addLog('Гипотеза 2 доказана: материальный состав подлинно установлен.');
   }
-  if(Object.values(state.hypotheses).every(v => v === true)) document.getElementById('btnFinalize').disabled = false;
+  else if(id === 3 && (state.testedExperiments.has('audioTest') || state.testedExperiments.has('cleanTest'))) {
+    state.hypotheses[3] = true;
+    tag.textContent = 'Подтверждено'; tag.className = 'status-tag tag-proven'; btn.disabled = true;
+    addLog('Гипотеза 3 доказана: субстанция вы деляется объектом.');
+  } 
+  else if(id === 4 && state.testedExperiments.has('cleanTest') && state.hypotheses[1]) {
+    state.hypotheses[4] = true;
+    tag.textContent = 'Подтверждено'; tag.className = 'status-tag tag-proven'; btn.disabled = true;
+    addLog('Гипотеза 4 доказана: летальный механизм (удушение / перелом шеи).');
+  } 
+  else {
+    addLog('Недостаточно экспериментальных данных для этой гипотезы!');
+  }
+  updateUI();
 }
 
-function finalizeDossier() {
-  haptic('heavy');
-  document.getElementById('dossierContent').innerHTML = `
-    <b style="color:var(--amber)">ПРОТОКОЛ SCP-173 (Класс: Евклид)</b><br>
-    Камень, арматура, краска Krylon. Не может двигаться при прямом зрительном контакте. Крайне враждебен.
-  `;
-  addLog('Исследование завершено: досье сформировано!');
+function updateDossier() {
+  // Reveal text blocks dynamically in Dossier tab
+  if(state.testedExperiments.has('cleanTest')) {
+    const el = document.getElementById('text-containment-1');
+    el.className = 'revealed-text';
+    el.textContent = '3 (трех)';
+  }
+  if(state.testedExperiments.has('spectroTest')) {
+    const el = document.getElementById('text-desc-1');
+    el.className = 'revealed-text';
+    el.textContent = 'бетона и арматуры со следами краски марки Krylon';
+  }
+  if(state.hypotheses[1]) {
+    const el1 = document.getElementById('text-containment-2');
+    el1.className = 'revealed-text';
+    el1.textContent = 'Двое сотрудников должны непрерывно поддерживать визуальный контакт с объектом.';
+    
+    const el2 = document.getElementById('text-desc-2');
+    el2.className = 'revealed-text';
+    el2.textContent = 'пределах прямой видимости (не допускать разрыва визуального контакта).';
+  }
+  if(state.hypotheses[3]) {
+    const el = document.getElementById('text-threat-2');
+    el.className = 'revealed-text';
+    el.textContent = 'смеси красно-коричневой массы (кровь и фекалии)';
+  }
+  if(state.hypotheses[4]) {
+    const el = document.getElementById('text-threat-1');
+    el.className = 'revealed-text';
+    el.textContent = 'перелома шеи у основания черепа или удушения';
+  }
+  if(state.hypotheses[1] && state.hypotheses[4]) {
+    const el = document.getElementById('text-class');
+    el.className = 'revealed-text';
+    el.textContent = 'Евклид (Euclid)';
+    document.getElementById('dos-class').classList.add('unlocked');
+  }
 }
 
 function triggerGameOver(reason) {
@@ -402,6 +628,38 @@ function triggerGameOver(reason) {
 
 addLog('Система наблюдения инициализирована.');
 updateUI();
+</script>
+
+<script>
+const ideas = [
+  "Написать маленький скрипт, который меняет цвет фона страницы каждые 3 секунды.",
+  "Сделать кнопку, которая считает клики и показывает их в заголовке вкладки.",
+  "Собрать форму, проверяющую длину пароля прямо во время ввода.",
+  "Нарисовать аналоговые часы через setInterval и стрелки на CSS-transform.",
+  "Сделать карточку погоды с вымышленными данными и иконками.",
+  "Написать таймер обратного отсчёта до полуночи."
+];
+
+let index = 0;
+const idea = document.getElementById("idea");
+const counter = document.getElementById("counter");
+const like = document.getElementById("like");
+
+function formatNumber(value) {
+  return String(value + 1).padStart(2, "0");
+}
+
+document.getElementById("next")?.addEventListener("click", () => {
+  index = (index + 1) % ideas.length;
+  idea.textContent = ideas[index];
+  counter.textContent = formatNumber(index) + " / " + formatNumber(ideas.length - 1);
+});
+
+like?.addEventListener("click", () => {
+  const active = like.textContent === "♥";
+  like.textContent = active ? "♡" : "♥";
+  like.style.color = active ? "" : "#b94431";
+});
 </script>
 </body>
 </html>
